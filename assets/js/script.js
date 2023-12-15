@@ -34,12 +34,12 @@ async function getWeather(){
     searchResults = []
 
     // Get the current weather conditions and assign them to searchResults
-    let current = await fetch(`http://api.openweathermap.org/data/2.5/weather?q=${city}&units=imperial&appid=${apiKey}`)
+    let current = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city}&units=imperial&appid=${apiKey}`)
     let currentWeather = await current.json()
     searchResults.push(currentWeather)
 
     // Get the future weather conditions and assign them to searchResults
-    let future = await fetch(`http://api.openweathermap.org/data/2.5/forecast?q=${city}&units=imperial&appid=${apiKey}`)
+    let future = await fetch(`https://api.openweathermap.org/data/2.5/forecast?q=${city}&units=imperial&appid=${apiKey}`)
     let futureWeather = await future.json()
     searchResults.push(futureWeather)
 
