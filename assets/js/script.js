@@ -1,61 +1,103 @@
 // HTML variables
-let locationSearch = document.querySelector('#location-search')
+let citySearch = document.querySelector('#location-search')
 let searchBtn = document.querySelector('#search-btn')
 let cityHeading = document.querySelector('#city-heading')
 let currentSearch = document.querySelector('#current-search')
 let searchHistory = document.querySelector('#search-history')
 
+// Global variables
 const apiKey = '1284e3141b908b2ddb6ae4a7e4193178'
 let city = ''
-let searchResults = {}
-let searchHistoryStorage = JSON.parse(localStorage.getItem("search-history-storage")) || [];
+let searchResults = []
+let searchStorage = JSON.parse(localStorage.getItem("search-storage")) || [];
 
+// Initializing function
 function init(){
-    console.log(searchHistoryStorage)
-    populateSearchHistory()
+    updateSearchHistory()
 }
 init()
 
+// Event listener for the search button
 searchBtn.addEventListener('click', (e) => {
     e.preventDefault()
-    if(locationSearch.value!=''){
-        city = locationSearch.value
+    if(citySearch.value!=''){
+        city = citySearch.value
         getWeather()
     }
 })
 
+// Grab weather data from Open Weather API
 async function getWeather(){
-    let result = await fetch(`http://api.openweathermap.org/data/2.5/forecast?q=${city}&units=imperial&appid=${apiKey}`)
-    let text = await result.json()
-    searchResults = text
-    console.log(searchResults)
-    cityHeading.innerHTML = searchResults.city.name
-    searchHistoryStorage.push(searchResults.city.name)
-    localStorage.setItem('search-history-storage', JSON.stringify(searchHistoryStorage))
-    createWeatherBlocks()
-    populateSearchHistory()
+    // Clear searchResults
+    searchResults = []
+    
+    // Get the current weather conditions and assign them to searchResults
+    let current = await fetch(`http://api.openweathermap.org/data/2.5/weather?q=${city}&units=imperial&appid=${apiKey}`)
+    let currentWeather = await current.json()
+    searchResults.push(currentWeather)
+
+    // Get the future weather conditions and assign them to searchResults
+    let future = await fetch(`http://api.openweathermap.org/data/2.5/forecast?q=${city}&units=imperial&appid=${apiKey}`)
+    let futureWeather = await future.json()
+    searchResults.push(futureWeather)
+
+    // Trigger follow-on functions
+    updateDisplay()
+    updateSearchHistory()
 }
 
-async function createWeatherBlocks(){
+// Update display with weather data
+async function updateDisplay(){
+    // Function variables
+    let futureList = searchResults[1].list
+    
+    // Update city name to match the search
+    cityHeading.innerHTML = searchResults[0].name
+    // Reset the current search field
     currentSearch.innerHTML = ''
-    for(i=0;i<searchResults.list.length;i++){
-        if(searchResults.list[i].dt_txt.includes('12:00:00')){
+
+    // Add current weather conditions to the display
+    // Create HTML elements
+    let card = document.createElement('div')
+    card.setAttribute('class', 'card flex-fill bg-primary text-light')
+    let cardBody = document.createElement('div')
+    cardBody.setAttribute('class', 'card-body text-center')
+    let cardDate = document.createElement('h5')
+    cardDate.innerHTML = dayjs().format('YYYY-MM-DD')
+    let weatherIcon = document.createElement('img')
+    weatherIcon.setAttribute('src', `https://openweathermap.org/img/wn/${searchResults[0].weather[0].icon}@2x.png`)
+    weatherIcon.setAttribute('alt', 'Weather icon')
+    let temp = document.createElement('p')
+    temp.innerHTML = `Temperature: ${searchResults[0].main.temp}°F`
+    let humidity = document.createElement('p')
+    humidity.innerHTML = `Humidity: ${searchResults[0].main.humidity}`
+    let windSpeed = document.createElement('p')
+    windSpeed.innerHTML = `Wind Speed: ${searchResults[0].wind.speed}`
+    // Append HTML elements
+    cardBody.append(cardDate, weatherIcon, temp, humidity, windSpeed)
+    card.append(cardBody)
+    currentSearch.append(card)
+
+    // Add future weather conditions to the display
+    for(i=0;i<futureList.length;i++){
+        if(futureList[i].dt_txt.includes('12:00:00')){
+            // Create HTML elements
             let card = document.createElement('div')
             card.setAttribute('class', 'card flex-fill bg-secondary text-light')
             let cardBody = document.createElement('div')
             cardBody.setAttribute('class', 'card-body text-center')
             let cardDate = document.createElement('h5')
-            cardDate.innerHTML = searchResults.list[i].dt_txt.slice(0,-9)
+            cardDate.innerHTML = futureList[i].dt_txt.slice(0,-9)
             let weatherIcon = document.createElement('img')
-            weatherIcon.setAttribute('src', `https://openweathermap.org/img/wn/${searchResults.list[i].weather[0].icon}@2x.png`)
+            weatherIcon.setAttribute('src', `https://openweathermap.org/img/wn/${futureList[i].weather[0].icon}@2x.png`)
             weatherIcon.setAttribute('alt', 'Weather icon')
             let temp = document.createElement('p')
-            temp.innerHTML = `Temperature: ${searchResults.list[i].main.temp}°F`
+            temp.innerHTML = `Temperature: ${futureList[i].main.temp}°F`
             let humidity = document.createElement('p')
-            humidity.innerHTML = `Humidity: ${searchResults.list[i].main.humidity}`
+            humidity.innerHTML = `Humidity: ${futureList[i].main.humidity}`
             let windSpeed = document.createElement('p')
-            windSpeed.innerHTML = `Wind Speed: ${searchResults.list[i].wind.speed}`
-
+            windSpeed.innerHTML = `Wind Speed: ${futureList[i].wind.speed}`
+            // Append HTML elements
             cardBody.append(cardDate, weatherIcon, temp, humidity, windSpeed)
             card.append(cardBody)
             currentSearch.append(card)
@@ -63,10 +105,19 @@ async function createWeatherBlocks(){
     }
 }
 
-function populateSearchHistory(){
-    for(i=0;i<searchHistoryStorage.length;i++){
-        let item = document.createElement('h3')
-        item.innerHTML = `${searchHistoryStorage[i]}<br>`
-        searchHistory.append(item)
+// Update search history display and local storage
+function updateSearchHistory(){
+    if(searchResults!=''){
+        searchStorage.unshift(searchResults[0].name)
+        searchStorage.splice(5)
+        localStorage.setItem('search-storage', JSON.stringify(searchStorage))
+    }
+    searchHistory.innerHTML = ''
+    for(i=0;i<searchStorage.length;i++){
+        let searchBtn = document.createElement('button')
+        searchBtn.setAttribute('type','button')
+        searchBtn.setAttribute('class','btn btn-secondary m-1')
+        searchBtn.innerHTML = searchStorage[i]
+        searchHistory.append(searchBtn)
     }
 }
