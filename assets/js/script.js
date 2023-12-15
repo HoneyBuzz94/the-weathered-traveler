@@ -123,7 +123,7 @@ function updateSearchHistory(){
     // Clear the search history field before repopulating
     searchHistory.innerHTML = ''
 
-    // Populate search history field with search history storage
+    // Add search history to the display
     for(i=0;i<searchStorage.length;i++){
         // Create HTML elements
         let historyBtn = document.createElement('button')
