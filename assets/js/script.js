@@ -13,7 +13,9 @@ let searchStorage = JSON.parse(localStorage.getItem("search-storage")) || [];
 
 // Initializing function
 function init(){
-    updateSearchHistory()
+    if(searchStorage!=''){
+        updateSearchHistory()
+    }
 }
 init()
 
@@ -30,7 +32,7 @@ searchBtn.addEventListener('click', (e) => {
 async function getWeather(){
     // Clear searchResults
     searchResults = []
-    
+
     // Get the current weather conditions and assign them to searchResults
     let current = await fetch(`http://api.openweathermap.org/data/2.5/weather?q=${city}&units=imperial&appid=${apiKey}`)
     let currentWeather = await current.json()
@@ -43,11 +45,15 @@ async function getWeather(){
 
     // Trigger follow-on functions
     updateDisplay()
-    updateSearchHistory()
+    if(searchStorage.includes(searchResults[0].name)){
+        console.log('City already in search history')
+    }else{
+        updateSearchHistory()
+    }
 }
 
 // Update display with weather data
-async function updateDisplay(){
+function updateDisplay(){
     // Function variables
     let futureList = searchResults[1].list
     
@@ -107,17 +113,29 @@ async function updateDisplay(){
 
 // Update search history display and local storage
 function updateSearchHistory(){
+    // Add new search to the storage array and local storage
     if(searchResults!=''){
         searchStorage.unshift(searchResults[0].name)
         searchStorage.splice(5)
         localStorage.setItem('search-storage', JSON.stringify(searchStorage))
     }
+
+    // Clear the search history field before repopulating
     searchHistory.innerHTML = ''
+
+    // Populate search history field with search history storage
     for(i=0;i<searchStorage.length;i++){
-        let searchBtn = document.createElement('button')
-        searchBtn.setAttribute('type','button')
-        searchBtn.setAttribute('class','btn btn-secondary m-1')
-        searchBtn.innerHTML = searchStorage[i]
-        searchHistory.append(searchBtn)
+        // Create HTML elements
+        let historyBtn = document.createElement('button')
+        historyBtn.setAttribute('type','button')
+        historyBtn.setAttribute('class','btn btn-secondary m-1')
+        historyBtn.addEventListener('click', (e) => {
+            e.preventDefault()
+            city = e.target.innerHTML
+            getWeather()
+        })
+        historyBtn.innerHTML = searchStorage[i]
+        // Append HTML elements
+        searchHistory.append(historyBtn)
     }
 }
