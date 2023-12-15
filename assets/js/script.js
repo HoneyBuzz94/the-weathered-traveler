@@ -3,13 +3,18 @@ let locationSearch = document.querySelector('#location-search')
 let searchBtn = document.querySelector('#search-btn')
 let cityHeading = document.querySelector('#city-heading')
 let currentSearch = document.querySelector('#current-search')
+let searchHistory = document.querySelector('#search-history')
 
 const apiKey = '1284e3141b908b2ddb6ae4a7e4193178'
 let city = ''
 let searchResults = {}
-let today = dayjs().format('YYYY-MM-DD')
+let searchHistoryStorage = JSON.parse(localStorage.getItem("search-history-storage")) || [];
 
-console.log(today)
+function init(){
+    console.log(searchHistoryStorage)
+    populateSearchHistory()
+}
+init()
 
 searchBtn.addEventListener('click', (e) => {
     e.preventDefault()
@@ -25,13 +30,16 @@ async function getWeather(){
     searchResults = text
     console.log(searchResults)
     cityHeading.innerHTML = searchResults.city.name
+    searchHistoryStorage.push(searchResults.city.name)
+    localStorage.setItem('search-history-storage', JSON.stringify(searchHistoryStorage))
     createWeatherBlocks()
+    populateSearchHistory()
 }
 
 async function createWeatherBlocks(){
+    currentSearch.innerHTML = ''
     for(i=0;i<searchResults.list.length;i++){
         if(searchResults.list[i].dt_txt.includes('12:00:00')){
-            console.log(`Date: ${searchResults.list[i].dt_txt} High: ${searchResults.list[i].main.temp_max}`)
             let card = document.createElement('div')
             card.setAttribute('class', 'card flex-fill bg-secondary text-light')
             let cardBody = document.createElement('div')
@@ -41,19 +49,24 @@ async function createWeatherBlocks(){
             let weatherIcon = document.createElement('img')
             weatherIcon.setAttribute('src', `https://openweathermap.org/img/wn/${searchResults.list[i].weather[0].icon}@2x.png`)
             weatherIcon.setAttribute('alt', 'Weather icon')
-            let tempHigh = document.createElement('p')
-            tempHigh.innerHTML = `High: ${searchResults.list[i].main.temp_max}`
-            let tempLow = document.createElement('p')
-            tempLow.innerHTML = `Low: ${searchResults.list[i].main.temp_min}`
+            let temp = document.createElement('p')
+            temp.innerHTML = `Temperature: ${searchResults.list[i].main.temp}°F`
             let humidity = document.createElement('p')
             humidity.innerHTML = `Humidity: ${searchResults.list[i].main.humidity}`
             let windSpeed = document.createElement('p')
             windSpeed.innerHTML = `Wind Speed: ${searchResults.list[i].wind.speed}`
 
-            cardBody.append(cardDate, weatherIcon, tempHigh, tempLow, humidity, windSpeed)
+            cardBody.append(cardDate, weatherIcon, temp, humidity, windSpeed)
             card.append(cardBody)
             currentSearch.append(card)
         }
     }
 }
 
+function populateSearchHistory(){
+    for(i=0;i<searchHistoryStorage.length;i++){
+        let item = document.createElement('h3')
+        item.innerHTML = `${searchHistoryStorage[i]}<br>`
+        searchHistory.append(item)
+    }
+}
