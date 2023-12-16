@@ -65,7 +65,8 @@ function updateDisplay(){
     // Add current weather conditions to the display
     // Create HTML elements
     let card = document.createElement('div')
-    card.setAttribute('class', 'card flex-fill bg-primary text-light')
+    card.setAttribute('class', 'card bg-primary text-light')
+    card.setAttribute('style','width: 13rem')
     let cardBody = document.createElement('div')
     cardBody.setAttribute('class', 'card-body text-center')
     let cardDate = document.createElement('h5')
@@ -89,7 +90,8 @@ function updateDisplay(){
         if(futureList[i].dt_txt.includes('12:00:00')){
             // Create HTML elements
             let card = document.createElement('div')
-            card.setAttribute('class', 'card flex-fill bg-secondary text-light')
+            card.setAttribute('class', 'card bg-secondary text-light')
+            card.setAttribute('style','width: 13rem')
             let cardBody = document.createElement('div')
             cardBody.setAttribute('class', 'card-body text-center')
             let cardDate = document.createElement('h5')
