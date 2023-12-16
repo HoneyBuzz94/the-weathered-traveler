@@ -77,9 +77,9 @@ function updateDisplay(){
     let temp = document.createElement('p')
     temp.innerHTML = `Temperature: ${searchResults[0].main.temp}°F`
     let humidity = document.createElement('p')
-    humidity.innerHTML = `Humidity: ${searchResults[0].main.humidity}`
+    humidity.innerHTML = `Humidity: ${searchResults[0].main.humidity} %`
     let windSpeed = document.createElement('p')
-    windSpeed.innerHTML = `Wind Speed: ${searchResults[0].wind.speed}`
+    windSpeed.innerHTML = `Wind Speed: ${searchResults[0].wind.speed} MPH`
     // Append HTML elements
     cardBody.append(cardDate, weatherIcon, temp, humidity, windSpeed)
     card.append(cardBody)
@@ -102,9 +102,9 @@ function updateDisplay(){
             let temp = document.createElement('p')
             temp.innerHTML = `Temperature: ${futureList[i].main.temp}°F`
             let humidity = document.createElement('p')
-            humidity.innerHTML = `Humidity: ${futureList[i].main.humidity}`
+            humidity.innerHTML = `Humidity: ${futureList[i].main.humidity} %`
             let windSpeed = document.createElement('p')
-            windSpeed.innerHTML = `Wind Speed: ${futureList[i].wind.speed}`
+            windSpeed.innerHTML = `Wind Speed: ${futureList[i].wind.speed} MPH`
             // Append HTML elements
             cardBody.append(cardDate, weatherIcon, temp, humidity, windSpeed)
             card.append(cardBody)
@@ -118,7 +118,7 @@ function updateSearchHistory(){
     // Add new search to the storage array and local storage
     if(searchResults!=''){
         searchStorage.unshift(searchResults[0].name)
-        searchStorage.splice(5)
+        searchStorage.splice(10)
         localStorage.setItem('search-storage', JSON.stringify(searchStorage))
     }
 
